@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Main GUI window for the Coffee Shop Simulation.
- *
+ *我试试头
  * Layout:
  *   LEFT  – Menu panel: items grouped by category, click to add to basket
  *   RIGHT – Basket panel: shows selected items, discount info, and total
