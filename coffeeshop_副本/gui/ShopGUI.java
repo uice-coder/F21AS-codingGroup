@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class ShopGUI extends JFrame {
 
+	int x = 1
     private final Manager manager;
     private final Menu menu;
 
