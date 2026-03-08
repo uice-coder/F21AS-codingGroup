@@ -1,55 +1,62 @@
 package coffeeshop.model;
 
 import coffeeshop.exception.InvalidDataException;
+import coffeeshop.util.Validator;
 
 /**
- * Represents a single item on the coffee shop menu.
- * Item IDs must follow the pattern: ^[A-Z]{3}-[0-9]{3}$
- * e.g., BEV-001, FOO-042, OTH-123
+ * Represents a single item available on the coffee shop menu.
+ *
+ * <p>Item IDs must satisfy {@link Validator#ITEM_ID_PATTERN}: {@code ^[A-Z]+-\d{3}$}
+ * Examples: COF-001, FOO-042, FOOD-002, TEA-001</p>
  */
 public class Item {
 
-    private final String itemId;
-    private final String name;
-    private final String description;
-    private final double price;
-    private final String category;
-    private int orderCount;
+    private final String itemId;   // immutable – used as HashMap key
+    private String name;
+    private String description;
+    private double price;
+    private String category;
+    private int    orderCount;
+
+    // ------------------------------------------------------------------ //
+    //  Constructor                                                          //
+    // ------------------------------------------------------------------ //
 
     /**
-     * Constructs an Item. Throws InvalidDataException if itemId is invalid.
+     * Constructs an Item with full validation.
      *
-     * @param itemId      unique identifier matching pattern [A-Z]{3}-[0-9]{3}
-     * @param name        display name of the item
-     * @param description short description
-     * @param price       cost in GBP (must be > 0)
-     * @param category    category name (BEV, FOO, OTH)
-     * @throws InvalidDataException if any field is invalid
+     * @param itemId      unique identifier matching {@link Validator#ITEM_ID_PATTERN}
+     * @param name        display name (must not be blank)
+     * @param description short description (may be empty)
+     * @param price       price in GBP (must be &gt; 0)
+     * @param category    category label, e.g. "Beverage", "Food", "Other"
+     * @throws InvalidDataException if itemId format is wrong, name is blank, or price &lt;= 0
      */
-    public Item(String itemId, String name, String description, double price, String category)
-            throws InvalidDataException {
+    public Item(String itemId, String name, String description,
+                double price, String category) throws InvalidDataException {
 
-        if (itemId == null || !itemId.matches("^[A-Z]{3}-[0-9]{3}$")) {
-            throw new InvalidDataException("Invalid item ID format: '" + itemId
-                    + "'. Expected pattern [A-Z]{3}-[0-9]{3}, e.g. BEV-001");
-        }
+        // Delegate format and range checks to Validator (single source of truth)
+        Validator.validateItemId(itemId);
+        Validator.validatePrice(price, itemId);
+
         if (name == null || name.trim().isEmpty()) {
-            throw new InvalidDataException("Item name cannot be empty for ID: " + itemId);
-        }
-        if (price <= 0) {
-            throw new InvalidDataException("Item price must be > 0, got: " + price + " for ID: " + itemId);
+            throw new InvalidDataException("Item name cannot be blank for ID: " + itemId);
         }
         if (category == null || category.trim().isEmpty()) {
-            throw new InvalidDataException("Category cannot be empty for ID: " + itemId);
+            throw new InvalidDataException("Category cannot be blank for ID: " + itemId);
         }
 
-        this.itemId = itemId;
-        this.name = name.trim();
+        this.itemId      = itemId.trim();
+        this.name        = name.trim();
         this.description = (description != null) ? description.trim() : "";
-        this.price = price;
-        this.category = category.trim().toUpperCase();
-        this.orderCount = 0;
+        this.price       = price;
+        this.category    = category.trim();   // preserve original case ("Beverage", "Food")
+        this.orderCount  = 0;
     }
+
+    // ------------------------------------------------------------------ //
+    //  Getters                                                              //
+    // ------------------------------------------------------------------ //
 
     public String getItemId()      { return itemId; }
     public String getName()        { return name; }
@@ -58,7 +65,52 @@ public class Item {
     public String getCategory()    { return category; }
     public int    getOrderCount()  { return orderCount; }
 
+    // ------------------------------------------------------------------ //
+    //  Setters                                                              //
+    // ------------------------------------------------------------------ //
+
+    /** Updates the display name (must not be blank). */
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty())
+            throw new IllegalArgumentException("Name cannot be blank");
+        this.name = name.trim();
+    }
+
+    /** Updates the description (null is treated as empty string). */
+    public void setDescription(String description) {
+        this.description = (description != null) ? description.trim() : "";
+    }
+
+    /**
+     * Updates the price.
+     * @throws IllegalArgumentException if price &lt;= 0
+     */
+    public void setPrice(double price) {
+        if (price <= 0)
+            throw new IllegalArgumentException("Price must be > 0, got: " + price);
+        this.price = price;
+    }
+
+    /** Updates the category label. */
+    public void setCategory(String category) {
+        if (category == null || category.trim().isEmpty())
+            throw new IllegalArgumentException("Category cannot be blank");
+        this.category = category.trim();
+    }
+
+    /** Directly sets the order count (useful for testing). */
+    public void setOrderCount(int orderCount) {
+        if (orderCount < 0)
+            throw new IllegalArgumentException("Order count cannot be negative");
+        this.orderCount = orderCount;
+    }
+
+    /** Increments the order count by 1 each time this item is ordered. */
     public void incrementOrderCount() { orderCount++; }
+
+    // ------------------------------------------------------------------ //
+    //  Utility                                                              //
+    // ------------------------------------------------------------------ //
 
     @Override
     public String toString() {
