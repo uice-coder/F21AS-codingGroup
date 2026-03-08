@@ -1,4 +1,4 @@
-package coffeeshop.model;
+package model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

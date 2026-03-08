@@ -1,7 +1,7 @@
-package coffeeshop.model;
+package model;
 
-import coffeeshop.exception.InvalidDataException;
-import coffeeshop.util.Validator;
+import exception.InvalidDataException;
+import util.Validator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -18,7 +18,7 @@ import java.util.*;
  *   <li>Apply discount rules via {@link #applyDiscount(Order)}</li>
  *   <li>Calculate total sales revenue</li>
  *   <li>Generate a plain-text sales report</li>
- *   <li>Provide data accessors for {@link coffeeshop.gui.ShopGUI}</li>
+ *   <li>Provide data accessors for {@link gui.ShopGUI}</li>
  * </ul>
  *
  * <h3>Discount rules (mutually exclusive – best one wins):</h3>

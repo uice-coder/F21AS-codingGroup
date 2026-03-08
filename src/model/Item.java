@@ -1,7 +1,7 @@
-package coffeeshop.model;
+package model;
 
-import coffeeshop.exception.InvalidDataException;
-import coffeeshop.util.Validator;
+import exception.InvalidDataException;
+import util.Validator;
 
 /**
  * Represents a single item available on the coffee shop menu.
