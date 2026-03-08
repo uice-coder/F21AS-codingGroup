@@ -1,8 +1,8 @@
-package coffeeshop.model;
+package model;
 
-import coffeeshop.exception.InvalidDataException;
+import exception.InvalidDataException;
 
-import coffeeshop.util.Validator;
+import util.Validator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

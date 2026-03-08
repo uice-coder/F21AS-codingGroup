@@ -1,9 +1,9 @@
-package coffeeshop.gui;
+package gui;
 
-import coffeeshop.model.Item;
-import coffeeshop.model.Manager;
-import coffeeshop.model.Menu;
-import coffeeshop.model.Order;
+import model.Item;
+import model.Manager;
+import model.Menu;
+import model.Order;
 
 import javax.swing.*;
 import javax.swing.border.*;
