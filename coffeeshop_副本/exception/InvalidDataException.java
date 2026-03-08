@@ -1,7 +1,7 @@
 package coffeeshop.exception;
 
 /**
- * Custom checked exception for data validation errors.
+ * Custom checked exception for data validation errors.石头
  * Thrown when data loaded from CSV files does not meet validation rules.
  */
 public class InvalidDataException extends Exception {

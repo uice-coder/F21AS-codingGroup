@@ -1,39 +1,45 @@
 package coffeeshop.model;
 
 import coffeeshop.exception.InvalidDataException;
+import coffeeshop.util.Validator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Core business layer.
- * - Loads orders from CSV
- * - Applies discount rules to a list of items
- * - Calculates totals
- * - Generates the summary report
+ * Core business layer for the Coffee Shop application.
  *
- * Discount rules (mutually exclusive; the better one is applied):
- *   Rule 1: 1 Beverage + 1 Food item  → 8% off
- *   Rule 2: 1 Beverage + 2 Food items → 15% off
- *   Rule 3: Pre-discount total > £50  → £5 off
+ * <p>Responsibilities:</p>
+ * <ul>
+ *   <li>Load orders from CSV and group them into {@link Order} objects</li>
+ *   <li>Apply discount rules via {@link #applyDiscount(Order)}</li>
+ *   <li>Calculate total sales revenue</li>
+ *   <li>Generate a plain-text sales report</li>
+ *   <li>Provide data accessors for {@link coffeeshop.gui.ShopGUI}</li>
+ * </ul>
+ *
+ * <h3>Discount rules (mutually exclusive – best one wins):</h3>
+ * <ol>
+ *   <li>Combo: &ge;1 Beverage AND &ge;2 Food &rarr; total &times; 0.8 (20&nbsp;% off)</li>
+ *   <li>Threshold: total &gt; &pound;50 &rarr; total &minus; &pound;5</li>
+ * </ol>
  */
 public class Manager {
 
-    private final Menu menu;
+    private final Menu         menu;
 
-    /** All orders loaded from the CSV file */
-    private final List<Order> orders;
+    /** All fully processed orders (discount already applied). */
+    private final List<Order>  orders;
 
-    /** Customer IDs seen (used to prevent duplicate processing in report) */
-    private final Set<String> customerIds;
+    /** All unique customer IDs seen across loaded orders. */
+    private final Set<String>  customerIds;
 
-    private static final DateTimeFormatter DATE_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    // ------------------------------------------------------------------ //
+    //  Constructor                                                          //
+    // ------------------------------------------------------------------ //
 
     public Manager(Menu menu) {
         this.menu        = menu;
@@ -42,109 +48,160 @@ public class Manager {
     }
 
     // ------------------------------------------------------------------ //
-    //  File loading                                                         //
+    //  CSV loading                                                          //
     // ------------------------------------------------------------------ //
 
     /**
-     * Loads orders from a CSV file.
-     * CSV format: timestamp,customerId,itemId
-     * Example:    2025-01-15 09:30:00,CUST-001,BEV-001
+     * Loads orders from a CSV file, grouping rows that share the same
+     * {@code orderId} into a single {@link Order} with multiple items.
      *
-     * Invalid lines are skipped and logged.
+     * <p>CSV column order: orderId, customerId, itemId, timestamp<br>
+     * Example: {@code ORD-001,CUST-001,COF-001,2025-01-15 09:00:00}</p>
+     *
+     * <p>Lines starting with {@code #} are treated as comments and skipped.
+     * A header row whose first field is {@code "orderId"} is also skipped.
+     * Invalid rows are logged to {@code System.err}; loading continues.</p>
+     *
+     * <p>After all rows are read, {@link #applyDiscount(Order)} is called on
+     * every assembled Order before it is stored.</p>
      *
      * @param filePath path to the orders CSV file
-     * @throws IOException if the file cannot be read
+     * @throws IOException if the file cannot be opened or read
      */
     public void loadOrdersFromCSV(String filePath) throws IOException {
+        // Use LinkedHashMap to preserve insertion order of orders
+        Map<String, Order> orderMap = new LinkedHashMap<>();
+
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             int lineNumber = 0;
+
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
                 line = line.trim();
+
+                // Skip blank lines and comment lines
                 if (line.isEmpty() || line.startsWith("#")) continue;
 
                 String[] parts = line.split(",", -1);
-                if (parts.length < 3) {
-                    System.err.println("[Manager] Line " + lineNumber + ": not enough fields, skipping: " + line);
+
+                // Skip header row
+                if (Validator.isHeaderLine(parts, "orderId")) continue;
+
+                if (parts.length < 4) {
+                    logSkip(lineNumber, "not enough fields (expected 4)", line);
                     continue;
                 }
 
-                String timestampStr = parts[0].trim();
+                String orderId      = parts[0].trim();
                 String customerId   = parts[1].trim();
                 String itemId       = parts[2].trim();
+                String timestampStr = parts[3].trim();
 
-                // Validate timestamp
-                LocalDateTime timestamp;
-                try {
-                    timestamp = LocalDateTime.parse(timestampStr, DATE_FORMAT);
-                } catch (DateTimeParseException e) {
-                    System.err.println("[Manager] Line " + lineNumber + ": invalid timestamp '" + timestampStr + "', skipping.");
+                // Validate orderId
+                if (orderId.isEmpty()) {
+                    logSkip(lineNumber, "orderId is empty", line);
                     continue;
                 }
 
-                // Validate customerId format (e.g. CUST-001)
-                if (!customerId.matches("^CUST-[0-9]{3}$")) {
-                    System.err.println("[Manager] Line " + lineNumber + ": invalid customer ID '" + customerId + "', skipping.");
+                // Validate customerId
+                try {
+                    Validator.validateCustomerId(customerId);
+                } catch (InvalidDataException e) {
+                    logSkip(lineNumber, e.getMessage(), line);
+                    continue;
+                }
+
+                // Validate and parse timestamp
+                LocalDateTime timestamp;
+                try {
+                    timestamp = Validator.parseTimestamp(timestampStr);
+                } catch (InvalidDataException e) {
+                    logSkip(lineNumber, e.getMessage(), line);
                     continue;
                 }
 
                 // Validate item exists in menu
                 Item item = menu.getItem(itemId);
                 if (item == null) {
-                    System.err.println("[Manager] Line " + lineNumber + ": unknown item ID '" + itemId + "', skipping.");
+                    logSkip(lineNumber, "unknown item ID '" + itemId + "' (not in menu)", line);
                     continue;
                 }
 
-                Order order = new Order(timestamp, customerId, item);
-                orders.add(order);
-                customerIds.add(customerId);
+                // Get or create the Order for this orderId
+                Order order = orderMap.computeIfAbsent(
+                        orderId,
+                        k -> new Order(orderId, customerId, timestamp));
+
+                order.addItem(item);
                 item.incrementOrderCount();
             }
         }
-        System.out.println("[Manager] Loaded " + orders.size() + " orders from " + filePath);
+
+        // Apply discount and register every assembled Order
+        for (Order order : orderMap.values()) {
+            applyDiscount(order);
+            orders.add(order);
+            customerIds.add(order.getCustomerId());
+        }
+
+        System.out.println("[Manager] Loaded " + orders.size()
+                + " order(s) from " + filePath);
+    }
+
+    private static void logSkip(int lineNum, String reason, String line) {
+        System.err.println("[Manager] Line " + lineNum + ": "
+                + reason + " - skipping: " + line);
     }
 
     // ------------------------------------------------------------------ //
-    //  Discount logic                                                       //
+    //  Discount                                                             //
     // ------------------------------------------------------------------ //
 
     /**
-     * Calculates the discount amount for a list of items.
-     * The most favourable of the three rules is applied (not cumulative).
+     * Applies discount rules to the given order by calling
+     * {@link Order#calculateFinalPrice()}.
      *
-     * @param items list of items in the order
-     * @return discount amount in GBP (0 if no rule matches)
+     * @param order the order to process (must not be null)
+     */
+    public void applyDiscount(Order order) {
+        if (order == null) throw new IllegalArgumentException("Order cannot be null");
+        order.calculateFinalPrice();
+    }
+
+    /**
+     * Calculates the discount amount for an arbitrary list of items.
+     *
+     * <p>Uses the same two-rule logic as {@link Order#calculateFinalPrice()}.
+     * Intended for live basket previews in the GUI.</p>
+     *
+     * @param items list of items to evaluate
+     * @return discount amount in GBP (0 if no rule applies)
      */
     public double calculateDiscount(List<Item> items) {
         if (items == null || items.isEmpty()) return 0.0;
 
-        double total       = calculateSubtotal(items);
-        int    bevCount    = 0;
-        int    foodCount   = 0;
+        double subtotal  = calculateSubtotal(items);
+        int    bevCount  = 0;
+        int    foodCount = 0;
 
         for (Item item : items) {
-            if ("BEV".equalsIgnoreCase(item.getCategory())) bevCount++;
-            else if ("FOO".equalsIgnoreCase(item.getCategory())) foodCount++;
+            String cat = item.getCategory();
+            if ("Beverage".equalsIgnoreCase(cat)) bevCount++;
+            else if ("Food".equalsIgnoreCase(cat)) foodCount++;
         }
 
-        double discount1 = 0.0; // 8%  - 1 bev + 1 food
-        double discount2 = 0.0; // 15% - 1 bev + 2 food
-        double discount3 = 0.0; // £5  - total > £50
+        double comboDiscount     = (bevCount >= 1 && foodCount >= 2) ? subtotal * 0.20 : 0.0;
+        double thresholdDiscount = (subtotal > 50.0)                 ? 5.0             : 0.0;
 
-        if (bevCount >= 1 && foodCount >= 1) discount1 = total * 0.08;
-        if (bevCount >= 1 && foodCount >= 2) discount2 = total * 0.15;
-        if (total > 50.0)                    discount3 = 5.0;
-
-        // Apply best discount only
-        return Math.max(discount1, Math.max(discount2, discount3));
+        return Math.max(comboDiscount, thresholdDiscount);
     }
 
     /**
-     * Calculates the subtotal (before discount) for a list of items.
+     * Returns the sum of all item prices in the list (before discount).
      *
      * @param items list of items
-     * @return sum of item prices
+     * @return subtotal in GBP
      */
     public double calculateSubtotal(List<Item> items) {
         if (items == null) return 0.0;
@@ -154,15 +211,31 @@ public class Manager {
     }
 
     /**
-     * Calculates the final payable amount (after discount).
+     * Returns the final payable amount for an arbitrary list of items.
      *
-     * @param items list of items in the order
-     * @return subtotal minus discount
+     * @param items list of items
+     * @return subtotal minus best discount
      */
     public double calculateFinalTotal(List<Item> items) {
-        double subtotal  = calculateSubtotal(items);
-        double discount  = calculateDiscount(items);
-        return subtotal - discount;
+        return calculateSubtotal(items) - calculateDiscount(items);
+    }
+
+    // ------------------------------------------------------------------ //
+    //  Sales analytics                                                      //
+    // ------------------------------------------------------------------ //
+
+    /**
+     * Calculates the total revenue from all stored orders.
+     *
+     * <p>Revenue is based on {@link Order#getFinalPrice()} (after discount),
+     * reflecting actual money received.</p>
+     *
+     * @return total sales revenue in GBP
+     */
+    public double calculateTotalSales() {
+        double total = 0.0;
+        for (Order order : orders) total += order.getFinalPrice();
+        return total;
     }
 
     // ------------------------------------------------------------------ //
@@ -170,44 +243,57 @@ public class Manager {
     // ------------------------------------------------------------------ //
 
     /**
-     * Generates a summary report as a String.
-     * Lists all menu items, their order counts, and the overall total revenue.
+     * Generates a plain-text sales report.
      *
-     * @return formatted report string
+     * <p>The report includes per-item sales counts and a revenue summary.</p>
+     *
+     * @return formatted report as a String
      */
-    public String generateReport() {
+    public String generateSalesReport() {
         StringBuilder sb = new StringBuilder();
         sb.append("========================================\n");
-        sb.append("          COFFEE SHOP SALES REPORT      \n");
+        sb.append("       COFFEE SHOP - SALES REPORT       \n");
         sb.append("========================================\n\n");
 
-        sb.append(String.format("%-10s %-25s %-8s %-10s%n",
-                "Item ID", "Name", "Price", "Orders"));
-        sb.append("-".repeat(58)).append("\n");
+        sb.append(String.format("%-10s %-26s %8s %8s%n",
+                "Item ID", "Name", "Price", "Sold"));
+        sb.append("------------------------------------------------------------\n");
 
-        double totalRevenue = 0.0;
         List<Item> allItems = new ArrayList<>(menu.getAllItems());
         allItems.sort(Comparator.comparing(Item::getItemId));
 
         for (Item item : allItems) {
-            double revenue = item.getPrice() * item.getOrderCount();
-            totalRevenue  += revenue;
-            sb.append(String.format("%-10s %-25s £%-7.2f %-10d%n",
-                    item.getItemId(), item.getName(), item.getPrice(), item.getOrderCount()));
+            sb.append(String.format("%-10s %-26s %7s %8d%n",
+                    item.getItemId(),
+                    item.getName(),
+                    String.format("£%.2f", item.getPrice()),
+                    item.getOrderCount()));
         }
 
-        sb.append("-".repeat(58)).append("\n");
-        sb.append(String.format("Total orders: %d%n", orders.size()));
-        sb.append(String.format("Total revenue: £%.2f%n", totalRevenue));
+        sb.append("------------------------------------------------------------\n");
+        sb.append(String.format("Total orders:  %d%n", orders.size()));
+        sb.append(String.format("Total revenue: £%.2f%n", calculateTotalSales()));
         sb.append("========================================\n");
         return sb.toString();
     }
 
     // ------------------------------------------------------------------ //
-    //  Accessors                                                            //
+    //  Accessors for GUI                                                    //
     // ------------------------------------------------------------------ //
 
-    public List<Order>    getOrders()     { return Collections.unmodifiableList(orders); }
-    public Set<String>    getCustomerIds(){ return Collections.unmodifiableSet(customerIds); }
-    public Menu           getMenu()       { return menu; }
+    /**
+     * Accepts a fully built order from the GUI (discount already applied).
+     * Adds the order to the internal list and records the customer ID.
+     *
+     * @param order the completed order (must not be null)
+     */
+    public void addOrderFromGUI(Order order) {
+        if (order == null) throw new IllegalArgumentException("Order cannot be null");
+        orders.add(order);
+        customerIds.add(order.getCustomerId());
+    }
+
+    public List<Order>  getOrders()      { return Collections.unmodifiableList(orders); }
+    public Set<String>  getCustomerIds() { return Collections.unmodifiableSet(customerIds); }
+    public Menu         getMenu()        { return menu; }
 }
