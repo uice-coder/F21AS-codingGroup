@@ -20,6 +20,7 @@ public class CoffeeShopApp {
     private static final String DEFAULT_MENU_PATH   = "data/menu.csv";
     private static final String DEFAULT_ORDERS_PATH = "data/orders.csv";
 
+    int s=2;
     public static void main(String[] args) {
         String menuPath   = (args.length > 0) ? args[0] : DEFAULT_MENU_PATH;
         String ordersPath = (args.length > 1) ? args[1] : DEFAULT_ORDERS_PATH;
