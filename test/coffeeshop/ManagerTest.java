@@ -1,9 +1,9 @@
 package coffeeshop;
 
-import coffeeshop.exception.InvalidDataException;
-import coffeeshop.model.Item;
-import coffeeshop.model.Manager;
-import coffeeshop.model.Menu;
+import exception.InvalidDataException;
+import model.Item;
+import model.Manager;
+import model.Menu;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

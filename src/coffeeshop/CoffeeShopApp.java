@@ -1,8 +1,8 @@
 package coffeeshop;
 
-import coffeeshop.gui.ShopGUI;
-import coffeeshop.model.Manager;
-import coffeeshop.model.Menu;
+import gui.ShopGUI;
+import model.Manager;
+import model.Menu;
 
 import javax.swing.*;
 import java.io.IOException;

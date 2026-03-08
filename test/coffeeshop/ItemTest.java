@@ -1,7 +1,7 @@
 package coffeeshop;
 
-import coffeeshop.exception.InvalidDataException;
-import coffeeshop.model.Item;
+import exception.InvalidDataException;
+import model.Item;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
