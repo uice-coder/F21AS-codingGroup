@@ -17,22 +17,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Premium coffee-shop style GUI for the Coffee Shop Order System.
- *
- * Layout:
- * NORTH  - branded banner
- * CENTER - left categories | middle product cards | right order summary
- * SOUTH  - customer ID + report/exit controls
- */
 public class ShopGUI extends JFrame {
 
-    // ------------------------------------------------------------------ //
-    // Theme
-    // ------------------------------------------------------------------ //
-
-    private static final Color GREEN_DARK   = new Color(0, 98, 65);     // #006241
-    private static final Color GREEN_MAIN   = new Color(0, 112, 74);    // #00704A
+    // colors
+    private static final Color GREEN_DARK   = new Color(0, 98, 65);
+    private static final Color GREEN_MAIN   = new Color(0, 112, 74);
     private static final Color GREEN_SOFT   = new Color(212, 233, 226);
     private static final Color CREAM_BG     = new Color(248, 245, 240);
     private static final Color CARD_BG      = new Color(255, 252, 248);
@@ -42,23 +31,11 @@ public class ShopGUI extends JFrame {
     private static final Color BORDER_SOFT  = new Color(223, 223, 218);
     private static final Color BUTTON_EXIT  = new Color(120, 108, 96);
 
-    // ------------------------------------------------------------------ //
-    // Model references
-    // ------------------------------------------------------------------ //
-
     private final Manager manager;
     private final Menu menu;
 
-    // ------------------------------------------------------------------ //
-    // Basket state
-    // ------------------------------------------------------------------ //
-
     private final List<Item> basket = new ArrayList<>();
     private int orderCounter = 0;
-
-    // ------------------------------------------------------------------ //
-    // UI state
-    // ------------------------------------------------------------------ //
 
     private String currentCategory = "All";
 
@@ -78,10 +55,6 @@ public class ShopGUI extends JFrame {
 
     private JTextField customerIdField;
 
-    // ------------------------------------------------------------------ //
-    // Construction
-    // ------------------------------------------------------------------ //
-
     public ShopGUI(Manager manager) {
         this.manager = manager;
         this.menu = manager.getMenu();
@@ -90,10 +63,6 @@ public class ShopGUI extends JFrame {
         refreshBasket();
         setVisible(true);
     }
-
-    // ------------------------------------------------------------------ //
-    // Initialisation
-    // ------------------------------------------------------------------ //
 
     private void initUI() {
         setTitle("Coffee Shop Order System");
@@ -115,10 +84,6 @@ public class ShopGUI extends JFrame {
             }
         });
     }
-
-    // ------------------------------------------------------------------ //
-    // Banner
-    // ------------------------------------------------------------------ //
 
     private JPanel buildBanner() {
         JPanel panel = new JPanel(new BorderLayout(16, 0));
@@ -167,10 +132,6 @@ public class ShopGUI extends JFrame {
         return panel;
     }
 
-    // ------------------------------------------------------------------ //
-    // Center content
-    // ------------------------------------------------------------------ //
-
     private JPanel buildCenterPanel() {
         JPanel panel = new JPanel(new BorderLayout(18, 0));
         panel.setOpaque(false);
@@ -182,10 +143,6 @@ public class ShopGUI extends JFrame {
 
         return panel;
     }
-
-    // ------------------------------------------------------------------ //
-    // Categories
-    // ------------------------------------------------------------------ //
 
     private JPanel buildCategoryPanel() {
         JPanel outer = createCardPanel("Categories");
@@ -263,10 +220,6 @@ public class ShopGUI extends JFrame {
         }
     }
 
-    // ------------------------------------------------------------------ //
-    // Products
-    // ------------------------------------------------------------------ //
-
     private JPanel buildProductsPanel() {
         JPanel outer = createCardPanel("Menu");
         outer.setLayout(new BorderLayout(0, 12));
@@ -342,10 +295,6 @@ public class ShopGUI extends JFrame {
                 || item.getCategory().equalsIgnoreCase(currentCategory);
     }
 
-    // ------------------------------------------------------------------ //
-    // Order summary
-    // ------------------------------------------------------------------ //
-
     private JPanel buildOrderPanel() {
         JPanel outer = createCardPanel("Your Order");
         outer.setPreferredSize(new Dimension(330, 100));
@@ -399,9 +348,9 @@ public class ShopGUI extends JFrame {
         JPanel actions = new JPanel(new GridLayout(1, 3, 8, 0));
         actions.setOpaque(false);
 
-        removeLastButton = new JButton("Remove Last");
+        removeLastButton  = new JButton("Remove Last");
         clearBasketButton = new JButton("Clear");
-        placeOrderButton = new JButton("Place Order");
+        placeOrderButton  = new JButton("Place Order");
 
         styleSoftActionButton(removeLastButton);
         styleSoftActionButton(clearBasketButton);
@@ -467,7 +416,7 @@ public class ShopGUI extends JFrame {
 
         double subtotal = manager.calculateSubtotal(basket);
         double discount = manager.calculateDiscount(basket);
-        double total = manager.calculateFinalTotal(basket);
+        double total    = manager.calculateFinalTotal(basket);
 
         subtotalLabel.setText(String.format("Subtotal   £%.2f", subtotal));
         if (discount > 0) {
@@ -479,30 +428,17 @@ public class ShopGUI extends JFrame {
         totalLabel.setText(String.format("TOTAL      £%.2f", total));
     }
 
+    // figures out which discount label to show
     private String discountLabelText(List<Item> items, double subtotal, double discount) {
-        int bev = 0;
-        int food = 0;
-
+        int bev = 0, food = 0;
         for (Item it : items) {
-            if ("Beverage".equalsIgnoreCase(it.getCategory())) {
-                bev++;
-            } else if ("Food".equalsIgnoreCase(it.getCategory())) {
-                food++;
-            }
+            if ("Beverage".equalsIgnoreCase(it.getCategory())) bev++;
+            else if ("Food".equalsIgnoreCase(it.getCategory())) food++;
         }
-
-        if (bev >= 1 && food >= 2 && Math.abs(discount - subtotal * 0.20) < 0.001) {
-            return "Combo";
-        }
-        if (subtotal > 50.0 && Math.abs(discount - 5.0) < 0.001) {
-            return "Threshold";
-        }
+        if (bev >= 1 && food >= 2 && Math.abs(discount - subtotal * 0.20) < 0.001) return "Combo";
+        if (subtotal > 50.0 && Math.abs(discount - 5.0) < 0.001) return "Threshold";
         return "Applied";
     }
-
-    // ------------------------------------------------------------------ //
-    // Bottom bar
-    // ------------------------------------------------------------------ //
 
     private JPanel buildBottomBar() {
         JPanel panel = new JPanel(new BorderLayout(12, 0));
@@ -536,7 +472,7 @@ public class ShopGUI extends JFrame {
         right.setOpaque(false);
 
         JButton reportBtn = new JButton("Generate Report");
-        JButton exitBtn = new JButton("Exit");
+        JButton exitBtn   = new JButton("Exit");
 
         styleSecondaryButton(reportBtn);
         styleNeutralButton(exitBtn);
@@ -552,10 +488,6 @@ public class ShopGUI extends JFrame {
 
         return panel;
     }
-
-    // ------------------------------------------------------------------ //
-    // Actions
-    // ------------------------------------------------------------------ //
 
     private void onPlaceOrder() {
         if (basket.isEmpty()) {
@@ -631,9 +563,7 @@ public class ShopGUI extends JFrame {
                 "Exit Application",
                 JOptionPane.YES_NO_CANCEL_OPTION);
 
-        if (choice == JOptionPane.CANCEL_OPTION) {
-            return;
-        }
+        if (choice == JOptionPane.CANCEL_OPTION) return;
         if (choice == JOptionPane.YES_OPTION) {
             onGenerateReport();
             System.out.println(manager.generateSalesReport());
@@ -641,10 +571,6 @@ public class ShopGUI extends JFrame {
         dispose();
         System.exit(0);
     }
-
-    // ------------------------------------------------------------------ //
-    // Helpers
-    // ------------------------------------------------------------------ //
 
     private JPanel createCardPanel(String title) {
         JPanel panel = new JPanel(new BorderLayout());
@@ -732,10 +658,7 @@ public class ShopGUI extends JFrame {
         return clean.substring(0, max - 3) + "...";
     }
 
-    // ------------------------------------------------------------------ //
-    // Product card
-    // ------------------------------------------------------------------ //
-
+    // inner class for product cards
     private class ProductCardPanel extends JPanel {
         private final Item item;
 
