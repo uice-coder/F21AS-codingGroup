@@ -1,5 +1,7 @@
 package coffeeshop;
 
+import java.io.File;
+import java.awt.Image;
 import gui.ShopGUI;
 import model.Manager;
 import model.Menu;
