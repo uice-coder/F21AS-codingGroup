@@ -1,42 +1,40 @@
-[2026-04-01 21:29:33] === Simulation starting with 3 server(s) ===
-[2026-04-01 21:29:33] Server 1 is ready and waiting for orders.
-[2026-04-01 21:29:33] Server 2 is ready and waiting for orders.
-[2026-04-01 21:29:33] OrderProducer started 每 will add 9 order(s) to the queue.
-[2026-04-01 21:29:33] Server 3 is ready and waiting for orders.
-[2026-04-01 21:29:36] Queue: CUST-001 joined (Order ORD-001, 3 item(s)). Queue size: 1
-[2026-04-01 21:29:36] Server 1 started processing Order ORD-001 for CUST-001 (3 item(s)).
-[2026-04-01 21:29:39] Queue: CUST-002 joined (Order ORD-002, 2 item(s)). Queue size: 1
-[2026-04-01 21:29:39] Server 3 started processing Order ORD-002 for CUST-002 (2 item(s)).
-[2026-04-01 21:29:42] Queue: CUST-003 joined (Order ORD-003, 1 item(s)). Queue size: 1
-[2026-04-01 21:29:42] Server 2 started processing Order ORD-003 for CUST-003 (1 item(s)).
-[2026-04-01 21:29:43] Simulation speed set to 3.0x.
-[2026-04-01 21:29:45] Simulation speed set to 4.0x.
-[2026-04-01 21:29:45] Queue: CUST-004 joined (Order ORD-004, 2 item(s)). Queue size: 1
-[2026-04-01 21:29:46] Server 2 completed Order ORD-003 for CUST-003. Total: ?3.80.
-[2026-04-01 21:29:46] Server 2 started processing Order ORD-004 for CUST-004 (2 item(s)).
-[2026-04-01 21:29:46] Queue: CUST-005 joined (Order ORD-005, 4 item(s)). Queue size: 1
-[2026-04-01 21:29:47] Queue: CUST-006 joined (Order ORD-006, 3 item(s)). Queue size: 2
-[2026-04-01 21:29:47] Queue: CUST-007 joined (Order ORD-007, 1 item(s)). Queue size: 3
-[2026-04-01 21:29:48] Queue: CUST-008 joined (Order ORD-008, 1 item(s)). Queue size: 4
-[2026-04-01 21:29:49] Queue: CUST-009 joined (Order ORD-009, 3 item(s)). Queue size: 5
-[2026-04-01 21:29:49] Queue closed 每 no more orders will be added.
-[2026-04-01 21:29:49] Server 1 completed Order ORD-001 for CUST-001. Total: ?6.80.
-[2026-04-01 21:29:49] Server 1 started processing Order ORD-005 for CUST-005 (4 item(s)).
-[2026-04-01 21:29:50] Server 2 completed Order ORD-004 for CUST-004. Total: ?11.50.
-[2026-04-01 21:29:50] Server 2 started processing Order ORD-006 for CUST-006 (3 item(s)).
-[2026-04-01 21:29:51] Server 3 completed Order ORD-002 for CUST-002. Total: ?8.00.
-[2026-04-01 21:29:51] Server 3 started processing Order ORD-007 for CUST-007 (1 item(s)).
-[2026-04-01 21:29:52] Server 3 completed Order ORD-007 for CUST-007. Total: ?9.99.
-[2026-04-01 21:29:52] Server 3 started processing Order ORD-008 for CUST-008 (1 item(s)).
-[2026-04-01 21:29:52] Server 3 completed Order ORD-008 for CUST-008. Total: ?3.20.
-[2026-04-01 21:29:52] Server 3 started processing Order ORD-009 for CUST-009 (3 item(s)).
-[2026-04-01 21:29:54] Simulation speed set to 1.5x.
-[2026-04-01 21:29:54] Server 2 completed Order ORD-006 for CUST-006. Total: ?6.24.
-[2026-04-01 21:29:54] Server 2 has finished serving.
-[2026-04-01 21:29:55] Server 1 completed Order ORD-005 for CUST-005. Total: ?15.92.
-[2026-04-01 21:29:55] Server 1 has finished serving.
-[2026-04-01 21:29:56] Simulation speed set to 1.0x.
-[2026-04-01 21:30:00] Server 3 completed Order ORD-009 for CUST-009. Total: ?7.28.
-[2026-04-01 21:30:00] Server 3 has finished serving.
-[2026-04-01 21:30:00] === All orders processed. Coffee shop closing. ===
-[2026-04-01 21:30:00] Sales report generated.
+[2026-04-01 21:35:00] === Simulation starting with 3 server(s) ===
+[2026-04-01 21:35:00] Server 2 is ready and waiting for orders.
+[2026-04-01 21:35:00] Server 3 is ready and waiting for orders.
+[2026-04-01 21:35:00] Server 1 is ready and waiting for orders.
+[2026-04-01 21:35:00] OrderProducer started 每 will add 9 order(s) to the queue.
+[2026-04-01 21:35:03] Simulation speed set to 1.5x.
+[2026-04-01 21:35:03] Queue: CUST-001 joined (Order ORD-001, 3 item(s)). Queue size: 1
+[2026-04-01 21:35:03] Server 2 started processing Order ORD-001 for CUST-001 (3 item(s)).
+[2026-04-01 21:35:03] Simulation speed set to 2.0x.
+[2026-04-01 21:35:05] Queue: CUST-002 joined (Order ORD-002, 2 item(s)). Queue size: 1
+[2026-04-01 21:35:05] Server 3 started processing Order ORD-002 for CUST-002 (2 item(s)).
+[2026-04-01 21:35:07] Queue: CUST-003 joined (Order ORD-003, 1 item(s)). Queue size: 1
+[2026-04-01 21:35:07] Server 1 started processing Order ORD-003 for CUST-003 (1 item(s)).
+[2026-04-01 21:35:08] Queue: CUST-004 joined (Order ORD-004, 2 item(s)). Queue size: 1
+[2026-04-01 21:35:08] Server 1 completed Order ORD-003 for CUST-003. Total: ?3.80.
+[2026-04-01 21:35:08] Server 1 started processing Order ORD-004 for CUST-004 (2 item(s)).
+[2026-04-01 21:35:10] Queue: CUST-005 joined (Order ORD-005, 4 item(s)). Queue size: 1
+[2026-04-01 21:35:10] Server 3 completed Order ORD-002 for CUST-002. Total: ?8.00.
+[2026-04-01 21:35:10] Server 3 started processing Order ORD-005 for CUST-005 (4 item(s)).
+[2026-04-01 21:35:11] Queue: CUST-006 joined (Order ORD-006, 3 item(s)). Queue size: 1
+[2026-04-01 21:35:12] Server 2 completed Order ORD-001 for CUST-001. Total: ?6.80.
+[2026-04-01 21:35:12] Server 2 started processing Order ORD-006 for CUST-006 (3 item(s)).
+[2026-04-01 21:35:13] Queue: CUST-007 joined (Order ORD-007, 1 item(s)). Queue size: 1
+[2026-04-01 21:35:14] Queue: CUST-008 joined (Order ORD-008, 1 item(s)). Queue size: 2
+[2026-04-01 21:35:16] Queue: CUST-009 joined (Order ORD-009, 3 item(s)). Queue size: 3
+[2026-04-01 21:35:16] Queue closed 每 no more orders will be added.
+[2026-04-01 21:35:16] Server 1 completed Order ORD-004 for CUST-004. Total: ?11.50.
+[2026-04-01 21:35:16] Server 1 started processing Order ORD-007 for CUST-007 (1 item(s)).
+[2026-04-01 21:35:18] Server 1 completed Order ORD-007 for CUST-007. Total: ?9.99.
+[2026-04-01 21:35:18] Server 1 started processing Order ORD-008 for CUST-008 (1 item(s)).
+[2026-04-01 21:35:19] Server 3 completed Order ORD-005 for CUST-005. Total: ?15.92.
+[2026-04-01 21:35:19] Server 3 started processing Order ORD-009 for CUST-009 (3 item(s)).
+[2026-04-01 21:35:20] Server 1 completed Order ORD-008 for CUST-008. Total: ?3.20.
+[2026-04-01 21:35:20] Server 1 has finished serving.
+[2026-04-01 21:35:23] Server 2 completed Order ORD-006 for CUST-006. Total: ?6.24.
+[2026-04-01 21:35:23] Server 2 has finished serving.
+[2026-04-01 21:35:28] Server 3 completed Order ORD-009 for CUST-009. Total: ?7.28.
+[2026-04-01 21:35:28] Server 3 has finished serving.
+[2026-04-01 21:35:28] === All orders processed. Coffee shop closing. ===
+[2026-04-01 21:35:28] Sales report generated.
