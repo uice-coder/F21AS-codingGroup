@@ -1,0 +1,15 @@
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\coffeeshop\CoffeeShopApp.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\exception\InvalidDataException.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\gui\ShopGUI.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\gui\SimulationGUI.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\model\Item.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\model\Manager.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\model\Menu.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\model\Order.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\simulation\CustomerProducer.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\simulation\CustomerQueue.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\simulation\SimulationController.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\simulation\SimulationLog.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\simulation\SimulationObserver.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\simulation\StaffMember.java
+C:\Users\Lenovo\Desktop\F21AS-codingGroup-main\stage2\src\util\Validator.java

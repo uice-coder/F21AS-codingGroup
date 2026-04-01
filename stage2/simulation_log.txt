@@ -1,0 +1,34 @@
+[05:02:43.449] Simulation started with 2 staff and 9 orders.
+[05:02:43.452] Staff 1 is ready.
+[05:02:43.452] Staff 2 is ready.
+[05:02:43.452] Customer CUST-001 joined the queue (Order: ORD-001, 3 item(s))
+[05:02:43.453] Staff 2 started processing order ORD-001 for CUST-001
+[05:02:45.552] Customer CUST-002 joined the queue (Order: ORD-002, 2 item(s))
+[05:02:45.552] Staff 1 started processing order ORD-002 for CUST-002
+[05:02:47.318] Customer CUST-003 joined the queue (Order: ORD-003, 1 item(s))
+[05:02:49.085] Customer CUST-004 joined the queue (Order: ORD-004, 2 item(s))
+[05:02:50.952] Staff 3 added during simulation.
+[05:02:50.953] Staff 3 is ready.
+[05:02:50.953] Staff 3 started processing order ORD-003 for CUST-003
+[05:02:51.471] Customer CUST-005 joined the queue (Order: ORD-005, 4 item(s))
+[05:02:53.437] Staff 3 COMPLETED order ORD-003 for CUST-003 (?3.80)
+[05:02:53.441] Staff 3 started processing order ORD-004 for CUST-004
+[05:02:53.886] Customer CUST-006 joined the queue (Order: ORD-006, 3 item(s))
+[05:02:55.584] Customer CUST-007 joined the queue (Order: ORD-007, 1 item(s))
+[05:02:55.609] Staff 1 COMPLETED order ORD-002 for CUST-002 (?8.00)
+[05:02:55.623] Staff 1 started processing order ORD-005 for CUST-005
+[05:02:57.374] Customer CUST-008 joined the queue (Order: ORD-008, 1 item(s))
+[05:02:59.510] Customer CUST-009 joined the queue (Order: ORD-009, 3 item(s))
+[05:03:01.025] Staff 2 COMPLETED order ORD-001 for CUST-001 (?6.80)
+[05:03:01.028] Staff 2 started processing order ORD-006 for CUST-006
+[05:03:01.068] All customers have joined the queue. Queue now closed.
+[05:03:09.399] Staff 3 COMPLETED order ORD-004 for CUST-004 (?11.50)
+[05:03:09.406] Staff 3 started processing order ORD-007 for CUST-007
+[05:03:14.213] Staff 3 COMPLETED order ORD-007 for CUST-007 (?9.99)
+[05:03:14.223] Staff 3 started processing order ORD-008 for CUST-008
+[05:03:16.994] Staff 1 COMPLETED order ORD-005 for CUST-005 (?15.92)
+[05:03:16.995] Staff 1 started processing order ORD-009 for CUST-009
+[05:03:17.892] Staff 3 COMPLETED order ORD-008 for CUST-008 (?3.20)
+[05:03:17.894] Staff 3 finished work.
+[05:03:21.802] Staff 2 COMPLETED order ORD-006 for CUST-006 (?6.24)
+[05:03:21.804] Staff 2 finished work.
