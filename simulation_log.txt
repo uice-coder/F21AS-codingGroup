@@ -1,0 +1,67 @@
+[21:22:07.500] Simulation started with 2 staff and 9 orders.
+[21:22:07.504] Staff 1 is ready.
+[21:22:07.504] Staff 2 is ready.
+[21:22:07.506] Customer CUST-001 joined the queue (Order: ORD-001, 3 item(s))
+[21:22:07.508] Staff 1 started processing order ORD-001 for CUST-001
+[21:22:09.245] Customer CUST-002 joined the queue (Order: ORD-002, 2 item(s))
+[21:22:09.245] Staff 2 started processing order ORD-002 for CUST-002
+[21:22:11.550] Customer CUST-003 joined the queue (Order: ORD-003, 1 item(s))
+[21:22:13.394] Customer CUST-004 joined the queue (Order: ORD-004, 2 item(s))
+[21:22:15.649] Customer CUST-005 joined the queue (Order: ORD-005, 4 item(s))
+[21:22:17.893] Customer CUST-006 joined the queue (Order: ORD-006, 3 item(s))
+[21:22:19.905] Customer CUST-007 joined the queue (Order: ORD-007, 1 item(s))
+[21:22:20.947] Staff 2 COMPLETED order ORD-002 for CUST-002 (£8.00)
+[21:22:20.947] Staff 2 started processing order ORD-003 for CUST-003
+[21:22:21.637] Customer CUST-008 joined the queue (Order: ORD-008, 1 item(s))
+[21:22:23.125] Staff 2 COMPLETED order ORD-003 for CUST-003 (£3.80)
+[21:22:23.125] Staff 2 started processing order ORD-004 for CUST-004
+[21:22:23.213] Customer CUST-009 joined the queue (Order: ORD-009, 3 item(s))
+[21:22:24.834] All customers have joined the queue. Queue now closed.
+[21:22:29.407] Staff 1 COMPLETED order ORD-001 for CUST-001 (£6.80)
+[21:22:29.407] Staff 1 started processing order ORD-005 for CUST-005
+[21:22:40.153] Staff 2 COMPLETED order ORD-004 for CUST-004 (£11.50)
+[21:22:40.153] Staff 2 started processing order ORD-006 for CUST-006
+[21:22:53.310] Staff 1 COMPLETED order ORD-005 for CUST-005 (£15.92)
+[21:22:53.310] Staff 1 started processing order ORD-007 for CUST-007
+[21:22:56.435] Staff 1 COMPLETED order ORD-007 for CUST-007 (£9.99)
+[21:22:56.435] Staff 1 started processing order ORD-008 for CUST-008
+[21:22:57.368] Staff 2 COMPLETED order ORD-006 for CUST-006 (£6.24)
+[21:22:57.368] Staff 2 started processing order ORD-009 for CUST-009
+[21:22:59.927] Staff 1 COMPLETED order ORD-008 for CUST-008 (£3.20)
+[21:22:59.927] Staff 1 finished work.
+[21:23:18.141] Staff 2 COMPLETED order ORD-009 for CUST-009 (£7.28)
+[21:23:18.141] Staff 2 finished work.
+[21:23:18.141] === Simulation complete. Coffee shop closing. ===
+[21:23:18.142] ========================================
+       COFFEE SHOP - SALES REPORT       
+========================================
+
+Item ID    Name                          Price     Sold
+------------------------------------------------------------
+COF-001    Espresso                     £2.50        2
+COF-002    Latte                        £3.50        1
+COF-003    Cappuccino                   £3.80        1
+COF-004    Flat White                   £4.00        1
+COF-005    Mocha                        £4.20        1
+FOO-001    Butter Croissant             £3.20        1
+FOO-002    Chocolate Muffin             £2.80        2
+FOO-003    Blueberry Muffin             £2.80        1
+FOO-004    Cheese Toastie               £4.50        1
+FOO-005    BLT Sandwich                 £5.50        1
+FOO-006    Tuna Melt                    £6.00        1
+FOO-007    Avocado Toast                £6.50        1
+FOO-008    Granola Bowl                 £5.20        1
+FOO-009    Flapjack                     £2.20        1
+FOO-010    Carrot Cake                  £3.80        1
+JUI-001    Orange Juice                 £3.20        1
+JUI-002    Sparkling Water              £1.80        0
+OTH-001    Reusable Cup                 £9.99        1
+OTH-002    Coffee Beans                 £7.50        0
+OTH-003    Loyalty Card                 £0.01        0
+TEA-001    Green Tea                    £2.80        1
+TEA-002    Hot Chocolate                £3.50        0
+------------------------------------------------------------
+Total orders:  9
+Total revenue: £72.73
+========================================
+

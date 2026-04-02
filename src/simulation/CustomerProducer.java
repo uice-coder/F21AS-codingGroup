@@ -10,13 +10,12 @@ public class CustomerProducer extends Thread {
 
     private final List<Order> orders;
     private final CustomerQueue queue;
-    private volatile int speedMultiplier = 1;
+    private volatile double speedMultiplier = 1.0;
 
     public CustomerProducer(List<Order> orders, CustomerQueue queue) {
         super("CustomerProducer");
         this.orders = orders;
         this.queue = queue;
-        setDaemon(true);
     }
 
     @Override
@@ -25,7 +24,9 @@ public class CustomerProducer extends Thread {
             if (isInterrupted()) break;
             queue.enqueue(order);
             try {
-                long delay = (1500 + (long)(Math.random() * 1000)) / Math.max(1, speedMultiplier);
+                long baseSleepTime = 1500 + (long) (Math.random() * 1000);
+                long delay = Math.max(1L,
+                        Math.round(baseSleepTime / Math.max(0.1, speedMultiplier)));
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -36,5 +37,5 @@ public class CustomerProducer extends Thread {
         SimulationLog.getInstance().log("All customers have joined the queue. Queue now closed.");
     }
 
-    public void setSpeedMultiplier(int m) { this.speedMultiplier = m; }
+    public void setSpeedMultiplier(double m) { this.speedMultiplier = m; }
 }

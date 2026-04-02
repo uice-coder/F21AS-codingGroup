@@ -1,23 +1,28 @@
 package gui;
 
+import coffeeshop.AppLifecycleManager;
 import model.Item;
 import model.Manager;
 import model.Menu;
 import model.Order;
+import simulation.SimulationController;
+import simulation.SimulationObserver;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import util.ProjectPaths;
 
-public class ShopGUI extends JFrame {
+public class ShopGUI extends JFrame implements SimulationObserver {
 
     // colors
     private static final Color GREEN_DARK   = new Color(0, 98, 65);
@@ -33,6 +38,8 @@ public class ShopGUI extends JFrame {
 
     private final Manager manager;
     private final Menu menu;
+    private final SimulationController simulationController;
+    private final AppLifecycleManager lifecycleManager;
 
     private final List<Item> basket = new ArrayList<>();
     private int orderCounter = 0;
@@ -52,15 +59,22 @@ public class ShopGUI extends JFrame {
     private JButton placeOrderButton;
     private JButton removeLastButton;
     private JButton clearBasketButton;
+    private JLabel simulationPolicyLabel;
 
     private JTextField customerIdField;
+    private final List<JButton> productAddButtons = new ArrayList<>();
 
-    public ShopGUI(Manager manager) {
+    public ShopGUI(Manager manager, SimulationController simulationController,
+                   AppLifecycleManager lifecycleManager) {
         this.manager = manager;
         this.menu = manager.getMenu();
+        this.simulationController = simulationController;
+        this.lifecycleManager = lifecycleManager;
+        simulationController.addObserver(this);
         initUI();
         refreshProducts();
         refreshBasket();
+        updateOrderEntryState();
         setVisible(true);
     }
 
@@ -260,6 +274,7 @@ public class ShopGUI extends JFrame {
 
     private void refreshProducts() {
         productsGrid.removeAll();
+        productAddButtons.clear();
 
         List<Item> items = new ArrayList<>(menu.getAllItems());
         items.sort(Comparator.comparing(Item::getCategory, String.CASE_INSENSITIVE_ORDER)
@@ -360,12 +375,14 @@ public class ShopGUI extends JFrame {
             if (!basket.isEmpty()) {
                 basket.remove(basket.size() - 1);
                 refreshBasket();
+                updateOrderEntryState();
             }
         });
 
         clearBasketButton.addActionListener(e -> {
             basket.clear();
             refreshBasket();
+            updateOrderEntryState();
         });
 
         placeOrderButton.addActionListener(e -> onPlaceOrder());
@@ -464,9 +481,14 @@ public class ShopGUI extends JFrame {
         hint.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         hint.setForeground(TEXT_SOFT);
 
+        simulationPolicyLabel = new JLabel();
+        simulationPolicyLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        simulationPolicyLabel.setForeground(TEXT_SOFT);
+
         left.add(custLabel);
         left.add(customerIdField);
         left.add(hint);
+        left.add(simulationPolicyLabel);
 
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         right.setOpaque(false);
@@ -490,6 +512,15 @@ public class ShopGUI extends JFrame {
     }
 
     private void onPlaceOrder() {
+        if (!simulationController.canAcceptNewOrders()) {
+            JOptionPane.showMessageDialog(this,
+                    "Order entry is locked because the simulation has already started.\n"
+                            + "This run uses the placed orders that existed when Start was pressed.",
+                    "Simulation Already Started",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         if (basket.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Your basket is empty. Please add items first.",
@@ -537,6 +568,38 @@ public class ShopGUI extends JFrame {
         basket.clear();
         customerIdField.setText("");
         refreshBasket();
+        updateOrderEntryState();
+    }
+
+    @Override
+    public void onSimulationUpdate() {
+        SwingUtilities.invokeLater(this::updateOrderEntryState);
+    }
+
+    private void updateOrderEntryState() {
+        boolean orderingOpen = simulationController.canAcceptNewOrders();
+
+        customerIdField.setEnabled(orderingOpen);
+        placeOrderButton.setEnabled(orderingOpen);
+        removeLastButton.setEnabled(orderingOpen && !basket.isEmpty());
+        clearBasketButton.setEnabled(orderingOpen && !basket.isEmpty());
+
+        for (JButton btn : categoryButtons.values()) {
+            btn.setEnabled(orderingOpen);
+        }
+        for (JButton btn : productAddButtons) {
+            btn.setEnabled(orderingOpen);
+        }
+
+        if (simulationPolicyLabel != null) {
+            if (orderingOpen) {
+                simulationPolicyLabel.setText(
+                        "Orders placed now will be included if you start the simulation.");
+            } else {
+                simulationPolicyLabel.setText(
+                        "Order entry locked: the current simulation is using a fixed snapshot.");
+            }
+        }
     }
 
     private void onGenerateReport() {
@@ -558,6 +621,8 @@ public class ShopGUI extends JFrame {
     }
 
     private void onExit() {
+        if (lifecycleManager.isShutdownInProgress()) return;
+
         int choice = JOptionPane.showConfirmDialog(this,
                 "Generate sales report before exiting?",
                 "Exit Application",
@@ -568,8 +633,7 @@ public class ShopGUI extends JFrame {
             onGenerateReport();
             System.out.println(manager.generateSalesReport());
         }
-        dispose();
-        System.exit(0);
+        lifecycleManager.shutdownApplication();
     }
 
     private JPanel createCardPanel(String title) {
@@ -683,10 +747,11 @@ public class ShopGUI extends JFrame {
                     new EmptyBorder(10, 10, 10, 10)
             ));
 
-            File imageFile = new File("assets/images/products/" + item.getItemId() + ".png");
+            Path imageFile = ProjectPaths.resolveOptional(
+                    "assets/images/products/" + item.getItemId() + ".png");
             JLabel imageLabel;
-            if (imageFile.exists()) {
-                ImageIcon icon = new ImageIcon(imageFile.getAbsolutePath());
+            if (Files.exists(imageFile)) {
+                ImageIcon icon = new ImageIcon(imageFile.toAbsolutePath().toString());
                 Image scaled = icon.getImage().getScaledInstance(130, 110, Image.SCALE_SMOOTH);
                 imageLabel = new JLabel(new ImageIcon(scaled), SwingConstants.CENTER);
             } else {
@@ -737,7 +802,10 @@ public class ShopGUI extends JFrame {
             addBtn.addActionListener(e -> {
                 basket.add(item);
                 refreshBasket();
+                updateOrderEntryState();
             });
+            productAddButtons.add(addBtn);
+            addBtn.setEnabled(simulationController.canAcceptNewOrders());
 
             JPanel metaTop = new JPanel(new BorderLayout());
             metaTop.setOpaque(false);

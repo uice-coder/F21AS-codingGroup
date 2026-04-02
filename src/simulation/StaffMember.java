@@ -17,14 +17,13 @@ public class StaffMember extends Thread {
 
     private volatile Status status = Status.IDLE;
     private volatile Order currentOrder = null;
-    private volatile int speedMultiplier = 1; // 1=normal,2=fast,3=slow
+    private volatile double speedMultiplier = 1.0;
 
     public StaffMember(int staffId, CustomerQueue queue, SimulationController controller) {
         super("Staff-" + staffId);
         this.staffId = staffId;
         this.queue = queue;
         this.controller = controller;
-        setDaemon(true);
     }
 
     @Override
@@ -59,9 +58,10 @@ public class StaffMember extends Thread {
         controller.notifyObservers();
 
         // Calculate processing time based on item types
-        long totalMs = calculateProcessingTime(order);
-        long divided = totalMs / Math.max(1, speedMultiplier);
-        Thread.sleep(divided);
+        long baseProcessingTime = calculateProcessingTime(order);
+        long actualProcessingTime = Math.max(1L,
+                Math.round(baseProcessingTime / Math.max(0.1, speedMultiplier)));
+        Thread.sleep(actualProcessingTime);
 
         SimulationLog.getInstance().log("Staff " + staffId
                 + " COMPLETED order " + order.getOrderId()
@@ -93,5 +93,5 @@ public class StaffMember extends Thread {
     public int getStaffId()        { return staffId; }
     public Status getStatus()      { return status; }
     public Order getCurrentOrder() { return currentOrder; }
-    public void setSpeedMultiplier(int m) { this.speedMultiplier = m; }
+    public void setSpeedMultiplier(double m) { this.speedMultiplier = m; }
 }

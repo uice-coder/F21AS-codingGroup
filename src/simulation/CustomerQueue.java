@@ -13,7 +13,12 @@ import java.util.ArrayList;
 public class CustomerQueue {
 
     private final Queue<Order> queue = new LinkedList<>();
+    private final Runnable onQueueChanged;
     private boolean closed = false;
+
+    public CustomerQueue(Runnable onQueueChanged) {
+        this.onQueueChanged = onQueueChanged;
+    }
 
     public synchronized void enqueue(Order order) {
         queue.add(order);
@@ -21,6 +26,7 @@ public class CustomerQueue {
                 + " joined the queue (Order: " + order.getOrderId() + ", "
                 + order.getItems().size() + " item(s))");
         notifyAll();
+        fireQueueChanged();
     }
 
     /**
@@ -30,12 +36,15 @@ public class CustomerQueue {
         while (queue.isEmpty() && !closed) {
             wait();
         }
-        return queue.poll();
+        Order order = queue.poll();
+        fireQueueChanged();
+        return order;
     }
 
     public synchronized void close() {
         closed = true;
         notifyAll();
+        fireQueueChanged();
     }
 
     public synchronized boolean isEmpty() {
@@ -52,5 +61,11 @@ public class CustomerQueue {
 
     public synchronized List<Order> snapshot() {
         return new ArrayList<>(queue);
+    }
+
+    private void fireQueueChanged() {
+        if (onQueueChanged != null) {
+            onQueueChanged.run();
+        }
     }
 }

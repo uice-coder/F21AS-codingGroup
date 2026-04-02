@@ -1,43 +1,59 @@
 package coffeeshop;
 
 import gui.ShopGUI;
+import gui.SimulationGUI;
 import model.Manager;
 import model.Menu;
+import simulation.SimulationController;
+import util.ProjectPaths;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.nio.file.Path;
 
-// Usage: java -cp bin coffeeshop.CoffeeShopApp [menuCsv] [ordersCsv]
+/**
+ * Main entry point for Stage 2.
+ * Launches the original Stage 1 GUI and the new simulation GUI.
+ */
 public class CoffeeShopApp {
 
     private static final String DEFAULT_MENU_PATH   = "data/menu.csv";
     private static final String DEFAULT_ORDERS_PATH = "data/orders.csv";
 
     public static void main(String[] args) {
-        String menuPath   = (args.length > 0) ? args[0] : DEFAULT_MENU_PATH;
-        String ordersPath = (args.length > 1) ? args[1] : DEFAULT_ORDERS_PATH;
+        Path menuPath = (args.length > 0)
+                ? ProjectPaths.resolveExisting(args[0])
+                : ProjectPaths.resolveExisting(DEFAULT_MENU_PATH);
+        Path ordersPath = (args.length > 1)
+                ? ProjectPaths.resolveExisting(args[1])
+                : ProjectPaths.resolveExisting(DEFAULT_ORDERS_PATH);
 
         Menu menu = new Menu();
         try {
-            menu.loadFromCSV(menuPath);
+            menu.loadFromCSV(menuPath.toString());
         } catch (IOException e) {
-            System.err.println("ERROR: Could not load menu file: " + menuPath);
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-
-        if (menu.size() == 0) {
-            System.err.println("WARNING: No valid menu items were loaded from " + menuPath);
+            System.err.println("ERROR: Could not load menu: " + menuPath);
+            final String message = "Could not load menu file: " + menuPath;
+            SwingUtilities.invokeLater(() ->
+                    JOptionPane.showMessageDialog(null, message,
+                            "Startup Error", JOptionPane.ERROR_MESSAGE));
+            return;
         }
 
         Manager manager = new Manager(menu);
         try {
-            manager.loadOrdersFromCSV(ordersPath);
+            manager.loadOrdersFromCSV(ordersPath.toString());
         } catch (IOException e) {
-            System.err.println("WARNING: Could not load orders file: " + ordersPath);
-            System.err.println("Continuing without pre-loaded orders.");
+            System.err.println("WARNING: Could not load orders: " + ordersPath);
         }
 
-        SwingUtilities.invokeLater(() -> new ShopGUI(manager));
+        SimulationController simController = new SimulationController(manager);
+        AppLifecycleManager lifecycleManager = new AppLifecycleManager(simController);
+
+        SwingUtilities.invokeLater(() -> {
+            ShopGUI shopGUI = new ShopGUI(manager, simController, lifecycleManager);
+            SimulationGUI simulationGUI = new SimulationGUI(simController, lifecycleManager);
+            lifecycleManager.registerWindows(shopGUI, simulationGUI);
+        });
     }
 }

@@ -1,5 +1,6 @@
 package gui;
 
+import coffeeshop.AppLifecycleManager;
 import model.Item;
 import model.Order;
 import simulation.SimulationController;
@@ -29,6 +30,7 @@ public class SimulationGUI extends JFrame implements SimulationObserver {
     private static final Color BORDER_SOFT = new Color(223, 223, 218);
 
     private final SimulationController controller;
+    private final AppLifecycleManager lifecycleManager;
 
     private JPanel staffPanel;
     private JTextArea queueArea;
@@ -39,8 +41,9 @@ public class SimulationGUI extends JFrame implements SimulationObserver {
     private JComboBox<String> speedBox;
     private JLabel queueSizeLabel;
 
-    public SimulationGUI(SimulationController controller) {
+    public SimulationGUI(SimulationController controller, AppLifecycleManager lifecycleManager) {
         this.controller = controller;
+        this.lifecycleManager = lifecycleManager;
         controller.addObserver(this);
         initUI();
         setVisible(true);
@@ -160,14 +163,22 @@ public class SimulationGUI extends JFrame implements SimulationObserver {
         JLabel speedLabel = new JLabel("Speed:");
         speedLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
 
-        speedBox = new JComboBox<>(new String[]{"Normal (1x)", "Fast (3x)", "Slow (0.5x)"});
+        speedBox = new JComboBox<>(new String[]{"Slow (0.5x)", "Normal (1x)", "Fast (3x)"});
         speedBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         speedBox.addActionListener(e -> {
             int idx = speedBox.getSelectedIndex();
-            if (idx == 0) controller.setSpeed(1);
-            else if (idx == 1) controller.setSpeed(3);
+            if (idx == 0) controller.setSpeed(0.5);
+            else if (idx == 1) controller.setSpeed(1.0);
             else controller.setSpeed(1); // slow: handled by dividing by fractional — use 1 and multiply sleep
         });
+
+        speedBox.addActionListener(e -> {
+            int idx = speedBox.getSelectedIndex();
+            if (idx == 0) controller.setSpeed(0.5);
+            else if (idx == 1) controller.setSpeed(1.0);
+            else controller.setSpeed(3.0);
+        });
+        speedBox.setSelectedIndex(1);
 
         JLabel staffLabel = new JLabel("  Staff count:");
         staffLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -189,20 +200,21 @@ public class SimulationGUI extends JFrame implements SimulationObserver {
     }
 
     private void onStart() {
-        if (controller.isRunning()) return;
+        if (controller.hasSimulationStarted()) return;
         startBtn.setEnabled(false);
         addStaffBtn.setEnabled(true);
-        statusLabel.setText("Status: Running...");
         controller.startSimulation();
     }
 
     private void onClose() {
-        SimulationLog.getInstance().writeToFile("simulation_log.txt");
+        if (lifecycleManager.isShutdownInProgress()) return;
+
         int choice = JOptionPane.showConfirmDialog(this,
-                "Exit simulation?", "Exit", JOptionPane.YES_NO_OPTION);
+                "Exit the coffee shop application?",
+                "Exit",
+                JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
-            dispose();
-            System.exit(0);
+            lifecycleManager.shutdownApplication();
         }
     }
 
@@ -213,10 +225,20 @@ public class SimulationGUI extends JFrame implements SimulationObserver {
         refreshQueuePanel();
         refreshLog();
 
-        if (!controller.isRunning() && controller.getQueue().isClosed()
-                && controller.getQueue().isEmpty()) {
-            statusLabel.setText("Status: Simulation Complete");
+        if (controller.getRunState() == SimulationController.RunState.READY) {
+            statusLabel.setText("Status: Ready - Start will snapshot the currently placed orders");
+            startBtn.setEnabled(true);
             addStaffBtn.setEnabled(false);
+        } else if (controller.getRunState() == SimulationController.RunState.RUNNING) {
+            statusLabel.setText("Status: Running snapshot of "
+                    + controller.getRunOrderCount() + " orders");
+            startBtn.setEnabled(false);
+            addStaffBtn.setEnabled(true);
+        } else if (!controller.isRunning() && controller.getQueue().isClosed()
+                && controller.getQueue().isEmpty()) {
+            statusLabel.setText("Status: Simulation Complete - restart is not enabled in this build");
+            addStaffBtn.setEnabled(false);
+            startBtn.setEnabled(false);
         }
     }
 
